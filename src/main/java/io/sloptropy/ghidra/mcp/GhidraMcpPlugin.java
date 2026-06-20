@@ -9,10 +9,18 @@ import ghidra.util.Msg;
 import io.sloptropy.ghidra.mcp.server.McpServerBootstrap;
 import io.sloptropy.ghidra.mcp.server.ProgramSource;
 import io.sloptropy.ghidra.mcp.server.ToolRegistry;
+import io.sloptropy.ghidra.mcp.tools.DisassembleRangeTool;
 import io.sloptropy.ghidra.mcp.tools.GetFunctionInfoTool;
 import io.sloptropy.ghidra.mcp.tools.GetProgramInfoTool;
+import io.sloptropy.ghidra.mcp.tools.GetXrefsTool;
+import io.sloptropy.ghidra.mcp.tools.ListExportsTool;
 import io.sloptropy.ghidra.mcp.tools.ListFunctionsTool;
+import io.sloptropy.ghidra.mcp.tools.ListImportsTool;
+import io.sloptropy.ghidra.mcp.tools.ListSegmentsTool;
+import io.sloptropy.ghidra.mcp.tools.ListStringsTool;
+import io.sloptropy.ghidra.mcp.tools.ListSymbolsTool;
 import io.sloptropy.ghidra.mcp.tools.RenameSymbolTool;
+import io.sloptropy.ghidra.mcp.tools.SearchBytesTool;
 import io.sloptropy.ghidra.mcp.tools.SetCommentTool;
 
 /**
@@ -52,6 +60,15 @@ public final class GhidraMcpPlugin extends ProgramPlugin {
         registry.register(new RenameSymbolTool());
         registry.register(new SetCommentTool());
         registry.register(new GetFunctionInfoTool());
+        // Phase 3
+        registry.register(new ListSegmentsTool());
+        registry.register(new ListStringsTool());
+        registry.register(new ListImportsTool());
+        registry.register(new ListExportsTool());
+        registry.register(new ListSymbolsTool());
+        registry.register(new GetXrefsTool());
+        registry.register(new DisassembleRangeTool());
+        registry.register(new SearchBytesTool());
 
         ProgramSource source = this::getCurrentProgram;
         server = new McpServerBootstrap(registry, source);
