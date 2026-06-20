@@ -160,7 +160,7 @@ Configuration UI is a future iteration. Override the port today by editing `Ghid
 
 ## License
 
-Not yet selected. The tree contains only operator-authored code; license decision is deferred to the first public release (`LOOM.md` Q5). Until a `LICENSE` file is committed, treat this as "all rights reserved" by default.
+MIT — see [`LICENSE`](LICENSE). Use freely, preserve the copyright + license text in copies, and there's no warranty.
 
 ---
 
