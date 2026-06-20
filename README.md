@@ -1,4 +1,6 @@
-# ghidra-mcp
+# muninn-ghidra
+
+Memory of the binary. Named for Odin's raven of memory — the project recovers what compilers strip and obfuscators hide.
 
 Single-process Java extension for Ghidra that hosts a Model Context Protocol (MCP) server. Exposes reverse-engineering tooling to MCP clients (Claude Code, custom integrations) for x64 / ARM firmware and game-binary analysis.
 
@@ -22,7 +24,7 @@ export GHIDRA_INSTALL_DIR=/path/to/ghidra_<ver>_PUBLIC
 gradle buildExtension
 ```
 
-Produces `dist/ghidra_<ver>_PUBLIC_<date>_ghidra-mcp.zip` (~8 MB; includes Jetty 12, Jackson 2.19, MCP Java SDK 0.17.1, and their transitive deps).
+Produces `dist/ghidra_<ver>_PUBLIC_<date>_muninn-ghidra.zip` (~8 MB; includes Jetty 12, Jackson 2.19, MCP Java SDK 0.17.1, and their transitive deps).
 
 ---
 
@@ -51,7 +53,7 @@ After install: launch Ghidra → `File → Configure → Developer → check "Gh
 The plugin auto-starts the MCP server on `127.0.0.1:8765` when enabled. Confirm in Ghidra's console:
 
 ```
-ghidra-mcp listening on 127.0.0.1:8765 (sse=/sse, streamable=/mcp); 5 tool(s)
+muninn-ghidra listening on 127.0.0.1:8765 (sse=/sse, streamable=/mcp); 14 tool(s)
 ```
 
 Two MCP transports are exposed simultaneously:
@@ -86,15 +88,36 @@ Adjust to your client's configuration format. Confirm the connection with `tools
 
 ## Tools
 
-Five behaviors are implemented today. Each has a full spec in `LOOM.md §4` (inputs, outputs, error modes, threat notes, acceptance tests).
+Fourteen tools today. Each has a full behavior spec in `LOOM.md §4` (inputs, outputs, error modes, threat notes, acceptance tests).
 
-| Name | Kind | Purpose |
-|---|---|---|
-| `list_functions` | read | List functions in the active program. Substring filter, max-results cap, thunk/external toggles. Deterministic by entry address. |
-| `get_program_info` | read | High-level metadata: name, executable format, language ID, image base, entry points, address spaces, memory size, function/symbol counts. Sentinel-on-missing for oddly-loaded binaries. |
-| `get_function_info` | read | Per-function detail: signature, prototype, parameters with storage, xref counts, analysis flags. Optional bounded-timeout decompile via Ghidra's `DecompInterface`. |
-| `rename_symbol` | mutate | Rename a function / label / global / parameter / local / namespace by address or name. Distinguishes tool-level failure (`isError=true`) from caller-recoverable semantic rejection (`renamed=false`, e.g. duplicate name). |
-| `set_comment` | mutate | Attach / replace / clear a comment at an address. All five Ghidra comment kinds (pre / post / eol / plate / repeatable). No-op clears do not pollute the undo stack. |
+**Read — orientation & inspection**
+
+| Name | Purpose |
+|---|---|
+| `get_program_info` | High-level metadata: name, format, language ID, image base, entry points, address spaces, memory size, function/symbol counts. Sentinel-on-missing for oddly-loaded binaries. |
+| `list_segments` | Memory map: each block's address range, r/w/x permissions, initialized status, source type. The format-agnostic section view. |
+| `list_functions` | Functions in the active program. Substring filter, max-results cap, thunk/external toggles. Deterministic by entry address. |
+| `list_symbols` | All symbol kinds (function / label / global / parameter / local / namespace / class). Substring + kind + namespace filters; default-name exclusion toggle. |
+| `list_strings` | Defined strings with encoding (ASCII / UTF-8 / UTF-16 / UTF-32), length, address, text. min_length and address_range filters. Fastest binary-orientation signal. |
+| `list_imports` | External symbols this program calls into — library, name, thunk address. |
+| `list_exports` | External entry points this program exposes (PE / ELF / Mach-O). |
+| `get_function_info` | Per-function detail: signature, parameters with storage, xref counts, analysis flags. Optional bounded-timeout decompile via Ghidra's `DecompInterface`. |
+| `get_xrefs` | Unified cross-reference traversal — inbound, outbound, or both. 9-bucket simplified reference type filter. |
+| `disassemble_range` | Instruction-level disassembly over an address range or whole function. Arch-portable through Ghidra's SLEIGH. |
+| `search_bytes` | Hex pattern search with `??` wildcards, address range scoping, context bytes. |
+
+**Audit — deterministic vulnerability and hardening signals**
+
+| Name | Purpose |
+|---|---|
+| `audit` | Four actions. `dangerous_calls` flags call sites of strcpy/gets/system/exec*/etc. with caller-overridable lists. `format_strings` flags printf-family calls with non-constant format args. `hardening` reports stack-canary / NX / ASLR / RELRO / CFG / CET status across PE/ELF/Mach-O. `anti_analysis` finds debug/VM/timing checks (IsDebuggerPresent / ptrace / RDTSC / cpuid). Surfaces signal, not verdict. |
+
+**Mutate — annotation**
+
+| Name | Purpose |
+|---|---|
+| `rename_symbol` | Rename a function / label / global / parameter / local / namespace by address or name. Distinguishes tool-level failure (`isError=true`) from caller-recoverable semantic rejection (`renamed=false`, e.g. duplicate name). |
+| `set_comment` | Attach / replace / clear a comment at an address. All five Ghidra comment kinds (pre / post / eol / plate / repeatable). No-op clears do not pollute the undo stack. |
 
 Mutations run on Ghidra's event-dispatch thread inside named transactions; each shows up as a single, readable entry in Ghidra's undo stack.
 

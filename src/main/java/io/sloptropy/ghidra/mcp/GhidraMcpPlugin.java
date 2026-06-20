@@ -25,7 +25,7 @@ import io.sloptropy.ghidra.mcp.tools.SearchBytesTool;
 import io.sloptropy.ghidra.mcp.tools.SetCommentTool;
 
 /**
- * Ghidra plugin entry point for the ghidra-mcp extension.
+ * Ghidra plugin entry point for the muninn-ghidra extension.
  *
  * On plugin init: builds the tool registry, starts the MCP server on a
  * fixed localhost port. The server lives for the lifetime of the plugin.

@@ -1,5 +1,5 @@
 /*
- * Ghidra extension build for ghidra-mcp.
+ * Ghidra extension build for muninn-ghidra.
  *
  * Build flow:
  *   1. GHIDRA_INSTALL_DIR env var (or -PGHIDRA_INSTALL_DIR) must point at

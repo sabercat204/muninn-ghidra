@@ -2,7 +2,7 @@
 
 ## Reporting issues
 
-If you find a security issue in ghidra-mcp, please do **not** open a public issue.
+If you find a security issue in muninn-ghidra, please do **not** open a public issue.
 
 Report privately via GitHub's "Report a vulnerability" button on the repository's Security tab. That keeps the discussion out of public view until a fix is ready.
 

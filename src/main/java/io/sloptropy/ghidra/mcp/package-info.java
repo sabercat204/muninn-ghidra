@@ -1,5 +1,5 @@
 /**
- * Root package for the ghidra-mcp Ghidra extension.
+ * Root package for the muninn-ghidra Ghidra extension.
  *
  * Sub-packages:
  *   io.sloptropy.ghidra.mcp.api      - McpTool interface and shared types

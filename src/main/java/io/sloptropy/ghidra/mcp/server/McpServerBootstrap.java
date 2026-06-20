@@ -79,7 +79,7 @@ public final class McpServerBootstrap {
                         .sseEndpoint("/sse")
                         .build();
         McpServer.sync(sseProvider)
-                .serverInfo("ghidra-mcp", "0.1.0")
+                .serverInfo("muninn-ghidra", "0.1.0")
                 .capabilities(McpSchema.ServerCapabilities.builder().tools(true).build())
                 .tools(specs)
                 .build();
@@ -92,7 +92,7 @@ public final class McpServerBootstrap {
                         .mcpEndpoint("/mcp")
                         .build();
         McpServer.sync(streamableProvider)
-                .serverInfo("ghidra-mcp", "0.1.0")
+                .serverInfo("muninn-ghidra", "0.1.0")
                 .capabilities(McpSchema.ServerCapabilities.builder().tools(true).build())
                 .tools(specs)
                 .build();
@@ -100,7 +100,7 @@ public final class McpServerBootstrap {
 
         jetty.start();
         port = connector.getLocalPort();
-        Msg.info(this, "ghidra-mcp listening on 127.0.0.1:" + port
+        Msg.info(this, "muninn-ghidra listening on 127.0.0.1:" + port
                 + " (sse=/sse, streamable=/mcp); " + registry.size() + " tool(s)");
     }
 
