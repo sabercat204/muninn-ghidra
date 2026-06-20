@@ -58,11 +58,9 @@ public final class ListFunctionsTool implements McpTool {
 
     @Override
     public McpSchema.CallToolResult execute(Map<String, Object> arguments, Program program) {
-        if (program == null) {
-            return ToolHelpers.error(
-                "no program loaded: open a program in Ghidra before calling list_functions");
-        }
-
+        // R-019: input validation precedes environment checks. A caller
+        // can fix an invalid argument without loading a program; can't
+        // fix "no program" by adjusting an argument.
         Object filterRaw = arguments.get("filter");
         if (filterRaw != null && !(filterRaw instanceof String)) {
             return ToolHelpers.error(
@@ -83,6 +81,11 @@ public final class ListFunctionsTool implements McpTool {
 
         boolean includeThunks = Boolean.TRUE.equals(arguments.get("include_thunks"));
         boolean includeExternal = Boolean.TRUE.equals(arguments.get("include_external"));
+
+        if (program == null) {
+            return ToolHelpers.error(
+                "no program loaded: open a program in Ghidra before calling list_functions");
+        }
 
         FunctionManager fm;
         List<Function> matched = new ArrayList<>();

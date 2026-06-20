@@ -8,3 +8,8 @@ dist/
 lib/
 out/
 target/
+
+# smoke harness — out-of-tree dev tool, not shipped
+smoke/build/
+smoke/server.log
+smoke/server.pid
