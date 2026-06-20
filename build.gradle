@@ -1,0 +1,176 @@
+/*
+ * Ghidra extension build for ghidra-mcp.
+ *
+ * Build flow:
+ *   1. GHIDRA_INSTALL_DIR env var (or -PGHIDRA_INSTALL_DIR) must point at
+ *      the Ghidra install root (the directory containing Ghidra/, support/,
+ *      etc.).
+ *   2. `gradle buildExtension` produces dist/<distro>_<name>.zip.
+ *   3. `tools/refresh-extension.sh` (added later) unpacks the zip into
+ *      Ghidra's user Extensions directory.
+ *
+ * Apply pattern: Ghidra ships its own buildExtension.gradle. We apply it
+ * from inside a setup task, exactly as Ghidra's documented template does.
+ */
+
+//---------------------- GHIDRA-PROVIDED EXTENSION BUILD ----------------------
+def ghidraInstallDir
+
+if (System.env.GHIDRA_INSTALL_DIR) {
+	ghidraInstallDir = System.env.GHIDRA_INSTALL_DIR
+} else if (project.hasProperty("GHIDRA_INSTALL_DIR")) {
+	ghidraInstallDir = project.getProperty("GHIDRA_INSTALL_DIR")
+} else {
+	throw new GradleException("GHIDRA_INSTALL_DIR is not set; export it or pass -PGHIDRA_INSTALL_DIR=<path>")
+}
+
+task distributeExtension {
+	group = "Ghidra"
+	apply from: new File(ghidraInstallDir).getCanonicalPath() + "/support/buildExtension.gradle"
+	dependsOn ':buildExtension'
+}
+//---------------------- END GHIDRA-PROVIDED ----------------------
+
+repositories {
+	mavenCentral()
+}
+
+/*
+ * cleanLib: wipes lib/*.jar before Ghidra's copyDependencies repopulates
+ * it. The Ghidra-supplied copyDependencies task is purely additive — it
+ * never removes stale jars after a version bump. Without this hook, an
+ * old Jetty/Jackson/Gson jar can linger alongside the new one and end up
+ * shipping in the extension zip, producing a runtime classpath collision.
+ *
+ * Discovery rationale: this is operational knowledge about Ghidra's
+ * Gradle build, not implementation knowledge of any prior plugin.
+ */
+tasks.register('cleanLib', Delete) {
+	group = "Ghidra Private"
+	delete fileTree(dir: 'lib', include: '*.jar')
+}
+tasks.matching { it.name == 'copyDependencies' }.configureEach {
+	dependsOn tasks.named('cleanLib')
+}
+
+dependencies {
+	// MCP Java SDK — official transport providers + JSON mapper integration.
+	// 0.17.1 is the verified-working revision; pre-1.0 SDK breaks freely
+	// between minors so version bumps are project-scope migrations, not
+	// dependency-hygiene swaps.
+	implementation 'io.modelcontextprotocol.sdk:mcp:0.17.1'
+
+	// Jetty 12 with Jakarta EE 10 servlet API. MCP SDK transport providers
+	// extend jakarta.servlet.http.HttpServlet, which Jetty 12's ee10
+	// module hosts. Jetty 11 (javax.servlet) is an incompatible track.
+	implementation 'org.eclipse.jetty:jetty-server:12.0.16'
+	implementation 'org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.16'
+
+	// Jackson for JSON processing — MCP SDK uses it via JacksonMcpJsonMapper.
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.0'
+	implementation 'com.fasterxml.jackson.core:jackson-core:2.19.0'
+	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.19.0'
+}
+
+/*
+ * Local-dev install/extract tasks.
+ *
+ *   gradle buildExtension     → produces dist/<distro>_<name>.zip
+ *   gradle installExtension   → copies zip into Ghidra install Extensions/
+ *                                AND extracts into the user Extensions/
+ *   gradle uninstallExtension → removes both
+ *
+ * Both Ghidra's "Install Extensions" GUI and these tasks ultimately drop
+ * the same unpacked tree into:
+ *   macOS:   ~/Library/ghidra/ghidra_<ver>_<release>/Extensions/<name>
+ *   Linux:   $XDG_CONFIG_HOME/ghidra/ghidra_<ver>_<release>/Extensions/<name>
+ *            (or ~/.config/ghidra/... if XDG_CONFIG_HOME unset)
+ *   Windows: %APPDATA%\ghidra\ghidra_<ver>_<release>\Extensions\<name>
+ */
+def extensionName = project.name
+
+def ghidraUserExtensionsDir = {
+	def overrideProp = project.findProperty("GHIDRA_USER_EXTENSIONS_DIR")
+	if (overrideProp) {
+		return file(overrideProp.toString())
+	}
+	def overrideEnv = System.getenv("GHIDRA_USER_EXTENSIONS_DIR")
+	if (overrideEnv) {
+		return file(overrideEnv)
+	}
+
+	def osName = (System.getProperty("os.name") ?: "").toLowerCase(Locale.ROOT)
+	def ghidraUserProfileDirName = "${DISTRO_PREFIX}_${RELEASE_NAME}"
+
+	if (osName.contains("windows")) {
+		def appData = System.getenv("APPDATA")
+		if (appData) {
+			return file("${appData}/ghidra/${ghidraUserProfileDirName}/Extensions")
+		}
+	}
+	if (osName.contains("mac") || osName.contains("darwin")) {
+		return file("${System.getProperty('user.home')}/Library/ghidra/${ghidraUserProfileDirName}/Extensions")
+	}
+	def xdgConfigHome = System.getenv("XDG_CONFIG_HOME")
+	def linuxConfigDir = xdgConfigHome ?: "${System.getProperty('user.home')}/.config"
+	return file("${linuxConfigDir}/ghidra/${ghidraUserProfileDirName}/Extensions")
+}.call()
+
+def ghidraInstallExtensionsZipDir = {
+	def overrideProp = project.findProperty("GHIDRA_EXTENSIONS_DROP_DIR")
+	if (overrideProp) {
+		return file(overrideProp.toString())
+	}
+	def overrideEnv = System.getenv("GHIDRA_EXTENSIONS_DROP_DIR")
+	if (overrideEnv) {
+		return file(overrideEnv)
+	}
+	return file("${ghidraInstallDir}/Extensions/Ghidra")
+}.call()
+
+def buildZipProvider = tasks.named('buildExtension', Zip).flatMap { it.archiveFile }
+def installZipDropFileTree = fileTree(ghidraInstallExtensionsZipDir) {
+	include "*_${extensionName}.zip"
+}
+
+tasks.register('cleanExtractedExtension', Delete) {
+	group = "Ghidra"
+	description = "Delete the extracted extension from Ghidra's user Extensions folder"
+	delete new File(ghidraUserExtensionsDir, extensionName)
+}
+
+tasks.register('cleanCopiedExtensionZips', Delete) {
+	group = "Ghidra"
+	description = "Delete copied extension zip(s) from the Ghidra install Extensions/Ghidra folder"
+	delete installZipDropFileTree
+}
+
+tasks.register('copyExtensionZip', Copy) {
+	group = "Ghidra"
+	description = "Copy the built extension zip into the Ghidra install Extensions/Ghidra folder"
+	dependsOn tasks.named('buildExtension'), tasks.named('cleanCopiedExtensionZips')
+	from(buildZipProvider)
+	into ghidraInstallExtensionsZipDir
+}
+
+tasks.register('extractExtension', Copy) {
+	group = "Ghidra"
+	description = "Extract the built extension into Ghidra's user Extensions folder"
+	dependsOn tasks.named('buildExtension'), tasks.named('cleanExtractedExtension')
+	from {
+		zipTree(buildZipProvider.get().asFile)
+	}
+	into ghidraUserExtensionsDir
+}
+
+tasks.register('installExtension') {
+	group = "Ghidra"
+	description = "Copy zip into Ghidra install AND extract into user Extensions"
+	dependsOn tasks.named('copyExtensionZip'), tasks.named('extractExtension')
+}
+
+tasks.register('uninstallExtension') {
+	group = "Ghidra"
+	description = "Remove extracted extension + copied zip"
+	dependsOn tasks.named('cleanExtractedExtension'), tasks.named('cleanCopiedExtensionZips')
+}
