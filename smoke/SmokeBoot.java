@@ -19,6 +19,7 @@ package smoke;
 import io.sloptropy.ghidra.mcp.server.McpServerBootstrap;
 import io.sloptropy.ghidra.mcp.server.ProgramSource;
 import io.sloptropy.ghidra.mcp.server.ToolRegistry;
+import io.sloptropy.ghidra.mcp.tools.AuditTool;
 import io.sloptropy.ghidra.mcp.tools.DisassembleRangeTool;
 import io.sloptropy.ghidra.mcp.tools.GetFunctionInfoTool;
 import io.sloptropy.ghidra.mcp.tools.GetProgramInfoTool;
@@ -51,6 +52,7 @@ public final class SmokeBoot {
         registry.register(new GetXrefsTool());
         registry.register(new DisassembleRangeTool());
         registry.register(new SearchBytesTool());
+        registry.register(new AuditTool());
 
         ProgramSource noProgram = () -> null;
         McpServerBootstrap server = new McpServerBootstrap(registry, noProgram);

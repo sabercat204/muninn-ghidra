@@ -51,4 +51,19 @@ public interface McpTool {
      * on time, randomness, or external state should also return false.
      */
     default boolean isCacheable() { return !isMutating(); }
+
+    /**
+     * Per-call cacheability for action-dispatched tools. The default
+     * delegates to the instance-level flag; tools with an action enum
+     * may override to opt some actions out of caching even when the
+     * tool is otherwise cacheable.
+     *
+     * The harness does not currently consult this — the response cache
+     * isn't wired up yet — but plumbing the hook through now means
+     * action-dispatched tools can declare action-specific caching
+     * intent without the interface needing a later breaking change.
+     */
+    default boolean isCacheable(Map<String, Object> arguments) {
+        return isCacheable();
+    }
 }

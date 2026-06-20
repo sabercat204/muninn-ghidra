@@ -9,6 +9,7 @@ import ghidra.util.Msg;
 import io.sloptropy.ghidra.mcp.server.McpServerBootstrap;
 import io.sloptropy.ghidra.mcp.server.ProgramSource;
 import io.sloptropy.ghidra.mcp.server.ToolRegistry;
+import io.sloptropy.ghidra.mcp.tools.AuditTool;
 import io.sloptropy.ghidra.mcp.tools.DisassembleRangeTool;
 import io.sloptropy.ghidra.mcp.tools.GetFunctionInfoTool;
 import io.sloptropy.ghidra.mcp.tools.GetProgramInfoTool;
@@ -69,6 +70,8 @@ public final class GhidraMcpPlugin extends ProgramPlugin {
         registry.register(new GetXrefsTool());
         registry.register(new DisassembleRangeTool());
         registry.register(new SearchBytesTool());
+        // Phase 4
+        registry.register(new AuditTool());
 
         ProgramSource source = this::getCurrentProgram;
         server = new McpServerBootstrap(registry, source);
