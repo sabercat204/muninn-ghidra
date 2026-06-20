@@ -6,6 +6,7 @@ import ghidra.program.model.listing.FunctionManager;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.symbol.Namespace;
 import io.modelcontextprotocol.spec.McpSchema;
+import io.sloptropy.ghidra.mcp.api.JsonRender;
 import io.sloptropy.ghidra.mcp.api.McpTool;
 import io.sloptropy.ghidra.mcp.api.ToolHelpers;
 
@@ -136,75 +137,6 @@ public final class ListFunctionsTool implements McpTool {
         result.put("program", program.getName());
         result.put("functions", rows);
 
-        return ToolHelpers.text(renderJson(result));
-    }
-
-    /**
-     * Minimal JSON renderer for the result shape this tool produces.
-     * Inlined rather than pulling in a JSON lib at the call site —
-     * Jackson is on the classpath but threading a writer through the
-     * MCP SDK's text-content shape is busier than this.
-     */
-    private static String renderJson(Object o) {
-        StringBuilder sb = new StringBuilder(256);
-        writeJson(sb, o);
-        return sb.toString();
-    }
-
-    private static void writeJson(StringBuilder sb, Object o) {
-        if (o == null) { sb.append("null"); return; }
-        if (o instanceof String s) { writeString(sb, s); return; }
-        if (o instanceof Number || o instanceof Boolean) {
-            sb.append(o.toString());
-            return;
-        }
-        if (o instanceof Map<?, ?> m) {
-            sb.append('{');
-            boolean first = true;
-            for (Map.Entry<?, ?> e : m.entrySet()) {
-                if (!first) sb.append(',');
-                first = false;
-                writeString(sb, e.getKey().toString());
-                sb.append(':');
-                writeJson(sb, e.getValue());
-            }
-            sb.append('}');
-            return;
-        }
-        if (o instanceof Iterable<?> it) {
-            sb.append('[');
-            boolean first = true;
-            for (Object x : it) {
-                if (!first) sb.append(',');
-                first = false;
-                writeJson(sb, x);
-            }
-            sb.append(']');
-            return;
-        }
-        writeString(sb, o.toString());
-    }
-
-    private static void writeString(StringBuilder sb, String s) {
-        sb.append('"');
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            switch (c) {
-                case '"':  sb.append("\\\""); break;
-                case '\\': sb.append("\\\\"); break;
-                case '\n': sb.append("\\n");  break;
-                case '\r': sb.append("\\r");  break;
-                case '\t': sb.append("\\t");  break;
-                case '\b': sb.append("\\b");  break;
-                case '\f': sb.append("\\f");  break;
-                default:
-                    if (c < 0x20) {
-                        sb.append(String.format("\\u%04x", (int) c));
-                    } else {
-                        sb.append(c);
-                    }
-            }
-        }
-        sb.append('"');
+        return ToolHelpers.text(JsonRender.render(result));
     }
 }

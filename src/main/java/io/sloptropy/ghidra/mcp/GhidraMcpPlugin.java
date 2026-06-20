@@ -9,7 +9,11 @@ import ghidra.util.Msg;
 import io.sloptropy.ghidra.mcp.server.McpServerBootstrap;
 import io.sloptropy.ghidra.mcp.server.ProgramSource;
 import io.sloptropy.ghidra.mcp.server.ToolRegistry;
+import io.sloptropy.ghidra.mcp.tools.GetFunctionInfoTool;
+import io.sloptropy.ghidra.mcp.tools.GetProgramInfoTool;
 import io.sloptropy.ghidra.mcp.tools.ListFunctionsTool;
+import io.sloptropy.ghidra.mcp.tools.RenameSymbolTool;
+import io.sloptropy.ghidra.mcp.tools.SetCommentTool;
 
 /**
  * Ghidra plugin entry point for the ghidra-mcp extension.
@@ -44,6 +48,10 @@ public final class GhidraMcpPlugin extends ProgramPlugin {
 
         ToolRegistry registry = new ToolRegistry();
         registry.register(new ListFunctionsTool());
+        registry.register(new GetProgramInfoTool());
+        registry.register(new RenameSymbolTool());
+        registry.register(new SetCommentTool());
+        registry.register(new GetFunctionInfoTool());
 
         ProgramSource source = this::getCurrentProgram;
         server = new McpServerBootstrap(registry, source);

@@ -19,7 +19,11 @@ package smoke;
 import io.sloptropy.ghidra.mcp.server.McpServerBootstrap;
 import io.sloptropy.ghidra.mcp.server.ProgramSource;
 import io.sloptropy.ghidra.mcp.server.ToolRegistry;
+import io.sloptropy.ghidra.mcp.tools.GetFunctionInfoTool;
+import io.sloptropy.ghidra.mcp.tools.GetProgramInfoTool;
 import io.sloptropy.ghidra.mcp.tools.ListFunctionsTool;
+import io.sloptropy.ghidra.mcp.tools.RenameSymbolTool;
+import io.sloptropy.ghidra.mcp.tools.SetCommentTool;
 
 public final class SmokeBoot {
     public static void main(String[] args) throws Exception {
@@ -27,6 +31,10 @@ public final class SmokeBoot {
 
         ToolRegistry registry = new ToolRegistry();
         registry.register(new ListFunctionsTool());
+        registry.register(new GetProgramInfoTool());
+        registry.register(new RenameSymbolTool());
+        registry.register(new SetCommentTool());
+        registry.register(new GetFunctionInfoTool());
 
         ProgramSource noProgram = () -> null;
         McpServerBootstrap server = new McpServerBootstrap(registry, noProgram);
