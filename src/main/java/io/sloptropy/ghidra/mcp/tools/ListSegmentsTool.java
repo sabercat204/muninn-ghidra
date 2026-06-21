@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** Implements LOOM §4 spec: list_segments. */
+/** Implements behavior spec: list_segments. */
 public final class ListSegmentsTool implements McpTool {
 
     @Override public String getName() { return "list_segments"; }

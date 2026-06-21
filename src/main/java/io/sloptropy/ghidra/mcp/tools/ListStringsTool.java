@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-/** Implements LOOM §4 spec: list_strings. */
+/** Implements behavior spec: list_strings. */
 public final class ListStringsTool implements McpTool {
 
     private static final int TEXT_TRUNCATE = 4096;

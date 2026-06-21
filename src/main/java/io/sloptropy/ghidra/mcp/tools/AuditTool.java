@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Implements LOOM §4 spec: audit.
+ * Implements behavior spec: audit.
  *
  * Action-dispatched tool: 4 deterministic vulnerability-and-hardening
  * scans. Each action composes existing Ghidra primitives — no novel

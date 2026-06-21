@@ -20,7 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-/** Implements LOOM §4 spec: list_symbols. */
+/** Implements behavior spec: list_symbols. */
 public final class ListSymbolsTool implements McpTool {
 
     private static final Set<String> KINDS = Set.of(

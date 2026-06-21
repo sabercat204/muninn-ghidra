@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implements LOOM §4 spec: set_comment.
+ * Implements behavior spec: set_comment.
  *
  * Mutating. Second mutating tool — validates the {@link Mutation}
  * helper's design (single body invocation, transaction by default,

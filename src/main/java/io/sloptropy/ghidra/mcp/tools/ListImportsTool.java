@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** Implements LOOM §4 spec: list_imports. */
+/** Implements behavior spec: list_imports. */
 public final class ListImportsTool implements McpTool {
 
     @Override public String getName() { return "list_imports"; }

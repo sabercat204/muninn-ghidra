@@ -25,7 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Implements LOOM §4 spec: disassemble_range. */
+/** Implements behavior spec: disassemble_range. */
 public final class DisassembleRangeTool implements McpTool {
 
     @Override public String getName() { return "disassemble_range"; }

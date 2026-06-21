@@ -20,7 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-/** Implements LOOM §4 spec: get_xrefs. */
+/** Implements behavior spec: get_xrefs. */
 public final class GetXrefsTool implements McpTool {
 
     private static final Set<String> DIRECTIONS = Set.of("to", "from", "both");

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** Implements LOOM §4 spec: list_exports. */
+/** Implements behavior spec: list_exports. */
 public final class ListExportsTool implements McpTool {
 
     @Override public String getName() { return "list_exports"; }

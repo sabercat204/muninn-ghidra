@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implements LOOM §4 spec: get_program_info.
+ * Implements behavior spec: get_program_info.
  *
  * Zero-input metadata read. Sentinel-on-missing semantics: per-field
  * absence returns the field's sentinel ("" / 0 / []) and does NOT

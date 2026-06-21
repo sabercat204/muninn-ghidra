@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Implements LOOM §4 spec: rename_symbol.
+ * Implements behavior spec: rename_symbol.
  *
  * First mutating tool; uses {@link Mutation} for the EDT + transaction
  * boundary. Distinguishes tool-level isError=true (caller can't fix

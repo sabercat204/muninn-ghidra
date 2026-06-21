@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Implements LOOM §4 spec: search_bytes. */
+/** Implements behavior spec: search_bytes. */
 public final class SearchBytesTool implements McpTool {
 
     @Override public String getName() { return "search_bytes"; }

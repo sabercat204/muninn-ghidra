@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Implements LOOM §4 spec: get_function_info.
+ * Implements behavior spec: get_function_info.
  *
  * Per-entity detail tool. Read-only. Found-not-error pattern: function
  * not found returns found=false with isError=false. Opt-in decompile

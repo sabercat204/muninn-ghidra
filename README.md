@@ -2,7 +2,7 @@
 
 Memory of the binary. Named for Odin's raven of memory — the project recovers what compilers strip and obfuscators hide.
 
-Single-process Java extension for Ghidra that hosts a Model Context Protocol (MCP) server. Exposes reverse-engineering tooling to MCP clients (Claude Code, custom integrations) for x64 / ARM firmware and game-binary analysis.
+Single-process Java extension for Ghidra that hosts a Model Context Protocol (MCP) server. Exposes reverse-engineering tooling to MCP-compatible clients for x64 / ARM firmware and game-binary analysis.
 
 **Status:** pre-1.0, personal-research scope. Five tools implemented; spec-first methodology — every tool is authored against an in-tree behavior spec before implementation.
 
@@ -60,7 +60,7 @@ Two MCP transports are exposed simultaneously:
 
 | Transport | Endpoint | Use when |
 |---|---|---|
-| Streamable-HTTP | `http://127.0.0.1:8765/mcp` | Current MCP clients (Claude Code, etc.) |
+| Streamable-HTTP | `http://127.0.0.1:8765/mcp` | Current MCP clients |
 | SSE | `http://127.0.0.1:8765/sse` + `/message` | Legacy clients that expect SSE |
 
 The server only binds to `127.0.0.1`. It is **not** a network service; reaching it from another machine requires a reverse proxy or tunnel that you set up yourself, after threat-modeling it.
@@ -69,7 +69,7 @@ The server only binds to `127.0.0.1`. It is **not** a network service; reaching 
 
 ## Connect (MCP client)
 
-Example Claude Code client config:
+Example MCP client config:
 
 ```json
 {
@@ -88,7 +88,7 @@ Adjust to your client's configuration format. Confirm the connection with `tools
 
 ## Tools
 
-Fourteen tools today. Each has a full behavior spec in `LOOM.md §4` (inputs, outputs, error modes, threat notes, acceptance tests).
+Fourteen tools today. Each has a full behavior spec in the in-tree design docs (inputs, outputs, error modes, threat notes, acceptance tests).
 
 **Read — orientation & inspection**
 
@@ -127,18 +127,13 @@ Untrusted-binary safety: tools only read parsed program state from Ghidra's symb
 
 ## Methodology
 
-The project uses two harness files:
-
-- **`CLAUDE.md`** — project rules for collaborative work (build / run, threat context, push discipline)
-- **`LOOM.md`** — project state machinery (`§1` metadata, `§4` specs, `§6` rules, `§8` current phase)
-
-A few load-bearing rules from `LOOM.md §6`:
+A few load-bearing project rules:
 
 - **R-013** — `git push` is destructive-class. Every push, every remote, runs through a pre-push scrub (paths, hostnames, env exports, secret-shaped tokens, fixture binaries).
 - **R-014** — License attribution travels with every distribution boundary. Sharing a built zip outside the build machine triggers third-party Apache 2.0 §4 obligations on the bundled jars.
 - **R-015** — Post-push audit checks what visitors actually see (default branch, inherited refs, license at the root URL), not just what was pushed.
 - **R-016** — Clean-room discipline during the rewrite phase: tool implementations read only the in-tree behavior spec and public Ghidra / MCP API docs. No prior implementation is consulted.
-- **R-017** — Spec-first: no implementation begins without a `§4` spec entry that has passed the every-WHEN-implies-a-NOT-WHEN and degenerate-case checks.
+- **R-017** — Spec-first: no implementation begins without a behavior-spec entry that has passed the every-WHEN-implies-a-NOT-WHEN and degenerate-case checks.
 - **R-019** — Input validation precedes environment checks. A caller can fix an invalid argument without changing the environment; the error message should reflect that.
 
 ---

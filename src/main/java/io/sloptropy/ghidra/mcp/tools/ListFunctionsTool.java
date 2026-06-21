@@ -18,7 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Implements LOOM §4 spec: list_functions.
+ * Implements behavior spec: list_functions.
  *
  * Read-only; structured-JSON output; deterministic by entry-address asc.
  */
